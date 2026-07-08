@@ -1,0 +1,38 @@
+datasource db {
+  provider = "sqlite"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Unit {
+  id            Int        @id @default(autoincrement())
+  name          String     @unique
+  currentStatus String     @default("NORMAL") // NORMAL, WARNING, CRITICAL
+  incidents     Incident[]
+  reports       Report[]
+}
+
+model Incident {
+  id             Int       @id @default(autoincrement())
+  unitId         Int
+  unit           Unit      @relation(fields: [unitId], references: [id])
+  status         String    @default("INVESTIGATING") // INVESTIGATING, PARTIAL, OFFLINE, RESOLVED
+  startedAt      DateTime  @default(now())
+  resolvedAt     DateTime?
+  resolutionTime String?
+  reports        Report[]
+}
+
+model Report {
+  id          Int       @id @default(autoincrement())
+  unitId      Int
+  unit        Unit      @relation(fields: [unitId], references: [id])
+  incidentId  Int?
+  incident    Incident? @relation(fields: [incidentId], references: [id])
+  problemType String
+  reportedAt  DateTime  @default(now())
+  userComment String?
+  userId      String?
+}
